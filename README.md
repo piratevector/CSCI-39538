@@ -1,4 +1,4 @@
-# CSCI-39538-Project-1
+# CSCI-39538
 Advanced Python - Spring 2022
 
 
