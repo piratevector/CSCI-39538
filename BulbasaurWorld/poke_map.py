@@ -118,7 +118,7 @@ class Map:
             for j,char in enumerate(row):
                 temp_row.append(Tile(char, (i,j)))
                 if char == ' ' and randint(0,10) == 0 and not trainerAdded: 
-                    temp_row[-1].add_entity(Trainer('Bill DeBlasio', 10000000, None, 'i like cocks'))
+                    temp_row[-1].add_entity(Trainer('Bill DeBlasio', 10000000, None, 'There are no fun facts about Bill DeBlasio.'))
                     trainerAdded = True
                 if char == 'w' and randint(0,10) == 0:
                     temp_row[-1].add_entity(Pokemon.generate_random_poke())
