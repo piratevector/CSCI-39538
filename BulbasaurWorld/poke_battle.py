@@ -100,6 +100,7 @@ class Battle:
             self.menu_stack.pop()
         def end_battle_callback():
             if outcome == 'lost':
+                # self.game_map.is_lost == True
                 return
             self.game_map.battle_screen = None
             self.menu_stack.pop()

@@ -25,7 +25,7 @@ class Menu:
 
         # Shit for the pad
         self.pad_height = 4 + len(options) + 2
-        self.pad_width = max(len(self.title), *map(lambda option: len(option.title), options)) + 4   # sick
+        self.pad_width = max(0, len(self.title), *map(lambda option: len(option.title), options)) + 4   # sick
 
         self.menu_pad = newpad(self.pad_height+2, self.pad_width+2)
 

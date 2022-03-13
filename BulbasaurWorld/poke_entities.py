@@ -77,9 +77,12 @@ class Player:
     
     @property
     def is_defeated(self):
+        if len(self.pokemon_list) == 0:
+            return False
         for poke in self.pokemon_list:
             if poke.health:
                 return False
+        return True
     
     def choose_poke(self,poke, close_menu):
         self.curr_poke = poke
@@ -109,9 +112,9 @@ class Player:
 
 class Trainer:
 
-    def __init__(self, name, pokemon_gifted, fun_fact='', award_amount=0, pokemon_list=[Pokemon.generate_random_poke() for _ in range(2)]):
+    def __init__(self, name, pokemon_gifted, fun_fact='', award_amount=0, pokemon_list=None):
         self.name = name
-        self.pokemon_list = pokemon_list
+        self.pokemon_list = pokemon_list if pokemon_list else [Pokemon.generate_random_poke() for _ in range(2)]
         self.award_amount = award_amount
         self.pokemon_gifted = pokemon_gifted
         self.fun_fact = fun_fact
@@ -142,16 +145,24 @@ class Item:
     def get_render_info(self):
         if self.item_name == 'potion':
             return '¡'
+        if self.item_name == 'pokeball':
+            return 'o'
         else: return '@'
     
     @classmethod
     def get_random_item(cls):
-        possible_names = ['potion', 'TM']
+        possible_names = ['potion', 'TM', 'pokeball']
         item_choice = choice(possible_names)
+        
         if item_choice == 'potion':
             def effect(poke):
                 poke.health = poke.total_health
             return Item('potion', effect)
+
+        if item_choice == 'pokeball':
+            poke = Pokemon.generate_random_poke()
+            return Item('pokeball', poke)
+
         possible_poke_moves = list(generator['moves'])
         move = choice(possible_poke_moves)
         def effect(poke):

@@ -9,9 +9,10 @@ from poke_mapstring import map_string
 from poke_map import Map
 from poke_entities import Pokemon, Player
 from poke_menus import Menu, MenuOption
-from splash_screen import splash_screen
+from splash_screen import splash_screen, splash_screen_won, splash_screen_lost
 
 def main_loop(name, terminal):
+
     curs_set(0)
     
     player = Player(name=name)
@@ -29,17 +30,16 @@ def main_loop(name, terminal):
     for index,line in enumerate(lines):
         splash_pad.addstr(index,1,line)
     terminal.refresh()
-    splash_pad.refresh(0,0,0,0,y,x)
+    splash_pad.refresh(0,0,0,0,y-1,x-1)
     terminal.getch()
 
     # Starter Pokemon etc
     starter_choices = [Pokemon.generate_random_poke() for _ in range(3)]
-    starter_flag=True
+    starter_selected=False
 
     def choose_starter(poke):
         player.set_starter(poke)
         game_map.curr_menus.pop()
-        starter_flag=False
 
     starter_menu = Menu([MenuOption(partial(choose_starter,poke), f'{poke.name}: {poke.type_of_pokemon}') for poke in starter_choices], 'Choose your Bulbasaur!')
     game_map.curr_menus.append(starter_menu)
@@ -49,6 +49,22 @@ def main_loop(name, terminal):
     while True:
         controller.handle_input()
         renderer.render()
+        if (len(player.pokemon_list) >= 4) or player.is_defeated:
+            break
+    # Splash screen
+    terminal.erase()
+    y,x = terminal.getmaxyx()
+    game_end_screen = splash_screen_won if player.is_defeated == False else splash_screen_lost
+    lines = game_end_screen.split('\n')
+    height = len(lines)
+    width = max(*map(len,lines))
+    splash_pad = newpad(height+3, width+3)
+    for index,line in enumerate(lines):
+        splash_pad.addstr(index,1,line)
+    terminal.refresh()
+    splash_pad.refresh(0,0,0,0,y-1,x-1)
+    terminal.getch()
+
 
 
 

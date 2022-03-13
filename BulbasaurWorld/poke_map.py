@@ -6,6 +6,9 @@ import curses
 from poke_menus import Menu, MenuOption
 from poke_battle import BattleScreen, Battle
 from poke_entities import Player, Trainer, Pokemon, Item
+import pandas as pd
+
+trainers = pd.read_csv('~/Documents/Advanced Python/trainers.csv')
 
 class Tile:
     def __init__(self, environment, coords):   #passable=True):
@@ -41,6 +44,7 @@ class Map:
         self.create_grid(map_string)
         self.set_player_location()
         self.battle_screen = None
+        self.is_lost = self.player.is_defeated
     
     # Menu you get when you pause
     def open_main_menu(self): 
@@ -64,7 +68,15 @@ class Map:
             if entity.__class__ == Trainer or entity.__class__ == Pokemon:
                 Battle(self.player, self, entity)
             if entity.__class__ == Item:
-                self.player.bag.append(entity)
+                if entity.item_name == 'pokeball':
+                    poke = entity.item_function
+                    self.player.pokemon_list.append(poke)
+                    if poke.type_of_pokemon[0] in ('A','E','I','O','U'):
+                        letter = 'n'
+                    else: letter = ''
+                    self.curr_menus.append(Menu([MenuOption(self.curr_menus.pop, 'okay')], f'You\'ve picked up a{letter} {poke.type_of_pokemon} pokeball!'))
+                else:
+                    self.player.bag.append(entity)
                 self.actual_grid[coords[0]][coords[1]].remove_entity(entity)
     
     def move_player(self, direction): 
@@ -111,15 +123,22 @@ class Map:
         #     for column in range(self.grid_dimensions[1]):
         #         initial_grid[-1].append(Tile(' ', (row,column)))
 
-        trainerAdded = False
+        trainer_list = []
+        for index,row in trainers.iterrows():
+            trainer_list.append(row)
+
+        trainer_count = 0
         map_rows = map_string.split('\n')
         for i,row in enumerate(map_rows):
             temp_row = []
             for j,char in enumerate(row):
                 temp_row.append(Tile(char, (i,j)))
-                if char == ' ' and randint(0,10) == 0 and not trainerAdded: 
-                    temp_row[-1].add_entity(Trainer('Bill DeBlasio', 10000000, None, 'There are no fun facts about Bill DeBlasio.'))
-                    trainerAdded = True
+                for row in trainer_list:
+                    if char == ' ' and randint(0,100) == 0 and trainer_count < 4:
+                        pokemon_gifted = None if row['pokemon_gifted'] == '' else Pokemon.generate_random_poke()
+                        temp_row[-1].add_entity(Trainer(row['name'], pokemon_gifted, row['fun_fact'], int(row['award_amount'])))
+                        trainer_count += 1
+                        trainer_list = [trainer for trainer in trainer_list if list(trainer) != list(row)]
                 if char == 'w' and randint(0,10) == 0:
                     temp_row[-1].add_entity(Pokemon.generate_random_poke())
                 if char == ' ' and (not temp_row[-1].entities) and randint(0,200) == 0:
